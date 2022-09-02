@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx_server
+    depends_on:
+      - my-laravel-app
+    restart: always
+    ports:
+      - 8080:80
+      - 443:443
+    volumes:
+      - ./:/usr/share/nginx/html:cashed
+      - ./.docker/nginx:/etc/nginx/conf.d/
+      - ./.docker/nginx/ssl:/etc/nginx/conf.d/ssl
+    networks:
+      - laravel-application-net
+
+  my-laravel-app:
+    build:
+      context: ./.docker/php
+      dockerfile: Dockerfile
+      container_name: laravel_php_8.1
+      depends_on:
+        - mysql-database
+        - redis
+      restart: always
+      volumes:
+        - ./:/var/www/html
+        - ./.docker/php/php-fpm.ini:/usr/local/etc/php/conf.d/custom.ini
+      networks:
+        - laravel-application-net
+
+  mysql-database:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: laravel_mysql_db
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=laravel_docker
+    networks:
+      - laravel-application-net
+
+  redis:
+    image: redis:alpine
+    container_name: laravel_redis_server
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - 6379:6379
+    networks:
+      - laravel-application-net
+
+networks:
+  laravel-application-net:
+    driver: bridge
