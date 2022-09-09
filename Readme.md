@@ -7,11 +7,14 @@
   <br />
 
 * Inside the project folder > for the first time you need to run...
-  <small> For Ubuntu </small>
+  <br>
+  <small> For Ubuntu : </small>
   <code> sudo docker compose up --build -d </code>
-  <small> For Mac </small>
+  <br>
+  <small> For Mac : </small>
   <code> docker-compose up --build -d </code>
-  <small> For Windows </small>
+  <br>
+  <small> For Windows : </small>
   <code> docker-compose up --build -d </code>
 
 <i>Note: For next time, you don't need to run with <code> --build </code> flag, just run <code> sudo docker compose up -d </code>
