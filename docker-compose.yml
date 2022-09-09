@@ -1,64 +1,53 @@
-version: '3.7'
+version: '3.8'
 
 services:
   nginx:
     image: nginx:alpine
-    container_name: laravel_nginx_server
+    container_name: nginx-server
+    ports:
+      - 443:80
     depends_on:
-      - my-laravel-app
-    restart: always
-    ports:
-      - 8080:80
-      - 443:443
+      - php
     volumes:
-      - ./:/usr/share/nginx/html:cashed
-      - ./.docker/nginx:/etc/nginx/conf.d/
-      - ./.docker/nginx/ssl:/etc/nginx/conf.d/ssl
+      - ./src:/var/www
+      - ./.docker/nginx/:/etc/nginx/conf.d
+    restart: always
     networks:
-      - laravel-application-net
+      - laravel-net
 
-  my-laravel-app:
+  php:
     build:
-      context: ./.docker/php
-      dockerfile: Dockerfile
-      container_name: laravel_php_8.1
-      depends_on:
-        - mysql-database
-        - redis
-      restart: always
-      volumes:
-        - ./:/var/www/html
-        - ./.docker/php/php-fpm.ini:/usr/local/etc/php/conf.d/custom.ini
-      networks:
-        - laravel-application-net
-
-  mysql-database:
-    image: mysql:latest
-    command: --default-authentication-plugin=mysql_native_password
-    container_name: laravel_mysql_db
+      context: ./
+      dockerfile: ./.docker/php/Dockerfile
+    image: php_laravel:1.0
     restart: always
-    ports:
-      - 3306:3306
+    depends_on:
+      - db
+      - redis
+    volumes: 
+      - ./src:/var/www
+    networks:
+      - laravel-net
+  
+  db:
+    image: mysql:latest
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ./data/db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=password
-      - MYSQL_DATABASE=laravel_docker
+      - MYSQL_DATABASE=docker_db
+      - MYSQL_USER=docker
+      - MYSQL_PASSWORD=secrete
     networks:
-      - laravel-application-net
+      - laravel-net
 
   redis:
     image: redis:alpine
-    container_name: laravel_redis_server
     volumes:
       - ./data/redis:/data
-    ports:
-      - 6379:6379
     networks:
-      - laravel-application-net
+      - laravel-net
 
 networks:
-  laravel-application-net:
+  laravel-net:
     driver: bridge
