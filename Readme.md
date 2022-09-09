@@ -25,7 +25,21 @@
          * Nginx:alpine
          * Php:8.0.23-fpm-alpine3.16
          * Mysql:latest
-         * redis:alpine
+         * Redis:alpine
+
+#### Next Step :
+
+<i>Inside the `laravel-app` container you need to run `composer update`. You can run all the command of a laravel application like `php artisan migrate` . To do this run .</i>
+<br/>
+
+```
+sudo docker ps
+sudo docker exec -it <container id> /bin/sh
+
+// inside the container terminal run this command
+composer update
+php artisan migrate
+```
 
 ###### After all done you will browse your app by <code> <i> https://localhost or https://127.0.0.1 </i></code>
 
